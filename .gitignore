@@ -1,0 +1,6 @@
+﻿bin/
+obj/
+.vs/
+appsettings.json
+*.csproj.user
+appsettings.Development.json
