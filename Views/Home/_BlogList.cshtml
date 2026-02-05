@@ -1,0 +1,38 @@
+﻿@using NewsBlogProject.ViewModels
+@model HomePageViewModel
+
+@foreach (var blog in Model.Blogs)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5>@blog.Title</h5>
+
+            <p>
+                @blog.Content.Substring(
+                0,
+                        Math.Min(blog.Content.Length, 200))...
+        </p>
+
+        <a asp-action="Details"
+           asp-route-id="@blog.NewsBlogId"
+           class="btn btn-sm btn-success">
+            View Details
+        </a>
+    </div>
+</div>
+}
+
+<nav>
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                <a href="javascript:void(0)"
+                   class="page-link ajax-page"
+                   data-page="@i">
+                    @i
+                </a>
+            </li>
+        }
+    </ul>
+</nav>

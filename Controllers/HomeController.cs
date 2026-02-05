@@ -1,22 +1,78 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using NewsBlogProject.Data;
 using NewsBlogProject.Models;
+using NewsBlogProject.ViewModels;
+using System.Diagnostics;
 
 namespace NewsBlogProject.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly NewsBlogDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(NewsBlogDbContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+        public IActionResult Index(
+        int? categoryId,
+        string search,
+        int page = 1)
+            {
+                int pageSize = 5;
+
+                var approvedStatusId = _context.TblNewsBlogStatuses
+                    .Where(s => s.StatusName == "Approved")
+                    .Select(s => s.NewsBlogStatusId)
+                    .First();
+
+                // Base query
+                var query = _context.TblNewsBlogs
+                    .Include(b => b.Category)
+                    .Where(b => b.NewsBlogStatusId == approvedStatusId &&
+                                b.IsDeleted == false);
+
+                // Search
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(b =>
+                        b.Title.Contains(search) ||
+                        b.Content.Contains(search));
+                }
+
+                // Category filter
+                if (categoryId.HasValue)
+                {
+                    query = query.Where(b => b.CategoryId == categoryId);
+                }
+
+                int totalRecords = query.Count();
+
+                var blogs = query
+                    .OrderByDescending(b => b.CreatedOn)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var model = new HomePageViewModel
+                {
+                    Categories = _context.TblNewsCategories
+                        .Where(c => c.IsDeleted == false)
+                        .ToList(),
+
+                    Blogs = blogs,
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalRecords = totalRecords,
+                    CategoryId = categoryId,
+                    Search = search
+                };
+
+                return View(model);
+            }
+
 
         public IActionResult Privacy()
         {
