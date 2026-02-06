@@ -69,9 +69,12 @@ namespace NewsBlogProject.Controllers
                     CategoryId = categoryId,
                     Search = search
                 };
-
-                return View(model);
+            if (HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_BlogList", model);
             }
+            return View(model);
+        }
 
 
         public IActionResult Privacy()

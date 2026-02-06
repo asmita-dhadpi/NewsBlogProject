@@ -140,5 +140,10 @@ namespace NewsBlogProject.Controllers
         {
             return View();
         }
+
+        public IActionResult UnauthorizedAccess()
+        {
+            return View();
+        }
     }
 }
