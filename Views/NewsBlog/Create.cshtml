@@ -1,0 +1,35 @@
+﻿@using NewsBlogProject.ViewModels
+@model NewsBlogViewModel
+@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+    var role = Context.Session.GetString("Role");
+}
+<h3>Create News Blog</h3>
+
+<form asp-action="Create" method="post">
+
+    <div class="mb-3">
+        <label>Category</label>
+        <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control"></select>
+    </div>
+
+    <div class="mb-3">
+        <label>Title</label>
+        <input asp-for="Title" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Content</label>
+        <textarea asp-for="Content" class="form-control" rows="6"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+    @if (role == "Admin" || role == "SuperAdmin")
+    {
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    }
+    else
+    {
+        <a asp-action="MyNews" class="btn btn-secondary">Cancel</a>
+    }
+</form>

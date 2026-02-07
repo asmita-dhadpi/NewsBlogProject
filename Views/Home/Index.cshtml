@@ -38,12 +38,14 @@
 @section Scripts
 {
     <script>
-        $(document).on("click", ".ajax-page", function () {
+        $(document).on("click", ".ajax-page", function (e) {
+            e.preventDefault();
             let page = $(this).data("page");
 
             $.ajax({
                 url: '@Url.Action("Index", "Home")',
                 type: 'GET',
+                headers: { "X-Requested-With": "XMLHttpRequest" },
                 data: {
                     page: page,
                     categoryId: '@Model.CategoryId',

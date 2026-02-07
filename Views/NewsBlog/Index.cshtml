@@ -1,0 +1,86 @@
+﻿@model IEnumerable<TblNewsBlog>
+@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+    var role = Context.Session.GetString("Role");
+}
+<h3>My Blogs</h3>
+
+<a asp-action="Create" class="btn btn-primary mb-2">Create Blog</a>
+<form method="get" class="row mb-3">
+    <div class="col-md-3">
+        <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="">-- All Status --</option>
+            <option value="Pending" selected="@(ViewBag.Status == "Pending")">Pending</option>
+            <option value="Approved" selected="@(ViewBag.Status == "Approved")">Approved</option>
+            <option value="Rejected" selected="@(ViewBag.Status == "Rejected")">Rejected</option>
+        </select>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Category</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Created On</th>
+        <th>Actions</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Category.CategoryName</td>
+            <td>@item.Title</td>
+            <td>
+                <span class="badge
+                @(item.NewsBlogStatus.StatusName == "Approved" ? "bg-success" :
+                                    item.NewsBlogStatus.StatusName == "Rejected" ? "bg-danger" : "bg-warning")">
+                    @item.NewsBlogStatus.StatusName
+                </span>
+            </td>
+
+            <td>@item.CreatedOn.ToShortDateString()</td>
+           
+            <td>
+                @if (role == "Admin" || role == "SuperAdmin")
+                {
+                     <a asp-action="Edit" asp-route-id="@item.NewsBlogId">Edit</a>
+                        <span>|</span>
+                        <a asp-action="Delete" asp-route-id="@item.NewsBlogId"
+                       onclick="return confirm('Delete this blog?')">Delete</a>
+                 }
+                else
+                {
+                    if (item.NewsBlogStatus.StatusName == "Pending")
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.NewsBlogId">Edit</a>
+                        <span>|</span>
+                        <a asp-action="Delete" asp-route-id="@item.NewsBlogId"
+                           onclick="return confirm('Delete this blog?')">Delete</a>
+                    }
+                   
+                }
+                @* ADMIN ACTIONS *@
+                @if ((role == "Admin" || role == "SuperAdmin") &&
+                            item.NewsBlogStatus.StatusName == "Pending")
+                {
+                    <form asp-action="ApproveReject"
+                          method="post"
+                          class="d-inline ms-2">
+
+                        <input type="hidden" name="id" value="@item.NewsBlogId" />
+
+                        <select name="actionType"
+                                class="form-select form-select-sm d-inline w-auto"
+                                onchange="this.form.submit()">
+                            <option value="">-- Action --</option>
+                            <option value="Approve">Approve</option>
+                            <option value="Reject">Reject</option>
+                        </select>
+                    </form>
+                }
+            </td>
+
+        </tr>
+    }
+</table>

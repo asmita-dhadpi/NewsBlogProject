@@ -1,0 +1,39 @@
+﻿@{
+    var role = Context.Session.GetString("Role");
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+}
+
+<ul class="nav flex-column gap-2">
+    <li class="nav-item">
+        <a class="nav-link text-white @(currentController == "Dashboard" ? "active fw-bold bg-dark" : "")"
+           href="/Dashboard/Index">
+            Dashboard
+        </a>
+    </li>
+    @if (role == "SuperAdmin" || role == "Admin")
+    {
+        <li class="nav-item">
+            <a class="nav-link text-white @(currentController == "Users" ? "active fw-bold bg-dark" : "")"
+               href="/Users/Index">
+                Users
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link text-white @(currentController == "NewsBlog" ? "active fw-bold bg-dark" : "")"
+               href="/NewsBlog/Index">
+                News
+            </a>
+        </li>
+    }
+    @if (role == "User")
+    {
+        <li class="nav-item">
+            <a class="nav-link text-white @(currentController == "NewsBlog" ? "active fw-bold bg-dark" : "")"
+               href="/NewsBlog/MyNews">
+                My News
+            </a>
+        </li>
+    }
+   
+</ul>

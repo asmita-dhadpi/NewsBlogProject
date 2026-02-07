@@ -1,0 +1,47 @@
+﻿@using NewsBlogProject.ViewModels
+@model UserDashboardVM
+@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<!-- DATE FILTER -->
+<div class="mb-3">
+    <a asp-action="Index" asp-route-filter="All"
+       class="btn btn-outline-primary @(Model.Filter == "All" ? "active" : "")">
+        All
+    </a>
+    <a asp-action="Index" asp-route-filter="Today"
+       class="btn btn-outline-success @(Model.Filter == "Today" ? "active" : "")">
+        Today
+    </a>
+    <a asp-action="Index" asp-route-filter="Month"
+       class="btn btn-outline-warning @(Model.Filter == "Month" ? "active" : "")">
+        This Month
+    </a>
+</div>
+
+<!-- DASHBOARD CARDS -->
+<div class="row g-3">
+
+    <div class="col-md-3">
+        <div class="card bg-info text-white p-3">
+            My Total News
+            <h3>@Model.MyTotalNews</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-success text-white p-3">
+            Approved News
+            <h3>@Model.MyApprovedNews</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-danger text-white p-3">
+            Rejected News
+            <h3>@Model.MyRejectedNews</h3>
+        </div>
+    </div>
+
+</div>
