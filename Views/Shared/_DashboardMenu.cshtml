@@ -18,7 +18,12 @@
                 Users
             </a>
         </li>
-
+        <li class="nav-item">
+            <a class="nav-link text-white @(currentController == "NewsCategory" ? "active fw-bold bg-dark" : "")"
+               href="/NewsCategory/Index">
+                Categories
+            </a>
+        </li>
         <li class="nav-item">
             <a class="nav-link text-white @(currentController == "NewsBlog" ? "active fw-bold bg-dark" : "")"
                href="/NewsBlog/Index">

@@ -1,0 +1,31 @@
+﻿@model IEnumerable<TblNewsCategory>
+@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<h4>Categories</h4>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Add Category</a>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Name</th>
+        <th>Created On</th>
+        <th>Actions</th>
+    </tr>
+
+    @foreach (var c in Model)
+    {
+        <tr>
+            <td>@c.CategoryName</td>
+            <td>@c.CreatedOn.ToShortDateString()</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@c.CategoryId">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@c.CategoryId"
+                   onclick="return confirm('Delete this category?')">
+                    Delete
+                </a>
+            </td>
+        </tr>
+    }
+</table>

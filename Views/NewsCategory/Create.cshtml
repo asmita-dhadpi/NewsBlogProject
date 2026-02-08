@@ -1,0 +1,17 @@
+﻿@model TblNewsCategory
+@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<h4>Add Category</h4>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label class="form-label">Category Name</label>
+        <input asp-for="CategoryName" class="form-control" />
+        <span asp-validation-for="CategoryName" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
