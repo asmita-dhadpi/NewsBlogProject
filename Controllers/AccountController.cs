@@ -69,6 +69,7 @@ namespace NewsBlogProject.Controllers
            
             // Store session
             HttpContext.Session.SetInt32("UserId", user.UserId);
+            HttpContext.Session.SetInt32("RoleId", user.RoleId);
             HttpContext.Session.SetString("UserName", user.FirstName);
             HttpContext.Session.SetString("Role", user.Role.RoleName);
 

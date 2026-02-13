@@ -1,0 +1,54 @@
+﻿@using NewsBlogProject.ViewModels
+@model UserViewModel
+@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<h4>Add User</h4>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <input asp-for="FirstName" class="form-control" placeholder="First Name" />
+    </div>
+
+    <div class="mb-3">
+        <input asp-for="LastName" class="form-control" placeholder="Last Name" />
+    </div>
+
+    <div class="mb-3">
+        <input asp-for="Email" class="form-control" placeholder="Email" />
+    </div>
+    <div class="mb-3">
+        <label>Password</label>
+        <div class="input-group">
+            <input asp-for="Password"
+                   type="password"
+                   id="passwordField"
+                   class="form-control" />
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    onclick="togglePassword()">
+                👁
+            </button>
+        </div>
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label>Phone Number</label>
+        <input asp-for="PhoneNumber" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <select asp-for="RoleId"
+                asp-items="@(new SelectList(ViewBag.Roles, "RoleId", "RoleName"))"
+                class="form-select">
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+</form>
+<script>
+    function togglePassword() {
+        var field = document.getElementById("passwordField");
+        field.type = field.type === "password" ? "text" : "password";
+    }
+</script>

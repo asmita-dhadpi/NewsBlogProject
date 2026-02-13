@@ -55,7 +55,8 @@ namespace NewsBlogProject.Controllers
                 .FirstOrDefault(c => c.CategoryId == id && c.IsDeleted == false);
 
             if (category == null)
-                return View("~/Views/Shared/Unauthorized.cshtml");
+                return RedirectToAction("UnauthorizedAccess", "Account");
+            //return View("~/Views/Shared/Unauthorized.cshtml");
 
             return View(category);
         }
@@ -68,7 +69,8 @@ namespace NewsBlogProject.Controllers
                 .FirstOrDefault(c => c.CategoryId == model.CategoryId && c.IsDeleted == false);
 
             if (category == null)
-                return View("~/Views/Shared/Unauthorized.cshtml");
+                return RedirectToAction("UnauthorizedAccess", "Account");
+            //return View("~/Views/Shared/Unauthorized.cshtml");
 
             category.CategoryName = model.CategoryName;
             category.ModifiedOn = DateTime.Now;
@@ -83,7 +85,8 @@ namespace NewsBlogProject.Controllers
                 .FirstOrDefault(c => c.CategoryId == id);
 
             if (category == null)
-                return View("~/Views/Shared/Unauthorized.cshtml");
+                return RedirectToAction("UnauthorizedAccess", "Account");
+           // return View("~/Views/Shared/Unauthorized.cshtml");
 
             category.IsDeleted = true;
             _context.SaveChanges();

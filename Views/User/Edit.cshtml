@@ -1,0 +1,61 @@
+﻿@using NewsBlogProject.ViewModels
+@model UserViewModel
+@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<h4>Edit User</h4>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="UserId" />
+    <div class="mb-3">
+        <input asp-for="FirstName" class="form-control" placeholder="First Name" />
+    </div>
+
+    <div class="mb-3">
+        <input asp-for="LastName" class="form-control" placeholder="Last Name" />
+    </div>
+
+    <div class="mb-3">
+        <input asp-for="Email" class="form-control" placeholder="Email" />
+    </div>
+    <div class="mb-3">
+        <label>Phone Number</label>
+        <input asp-for="PhoneNumber" class="form-control" />
+    </div>
+    <!-- CHANGE PASSWORD SECTION -->
+  
+    <div class="mb-3">
+        <label>New Password (leave blank to keep current)</label>
+        <div class="input-group">
+            <input asp-for="NewPassword"
+                   type="password"
+                   id="passwordField"
+                   class="form-control"
+                   placeholder="Enter new password" />
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    onclick="togglePassword()">
+                👁
+            </button>
+        </div>
+    </div>
+
+ 
+
+    <div class="mb-3">
+        <select asp-for="RoleId"
+                asp-items="@(new SelectList(ViewBag.Roles, "RoleId", "RoleName"))"
+                class="form-select">
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+
+</form>
+<script>
+    function togglePassword() {
+        var field = document.getElementById("passwordField");
+        field.type = field.type === "password" ? "text" : "password";
+    }
+</script>

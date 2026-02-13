@@ -1,0 +1,41 @@
+﻿@model IEnumerable<TblUser>
+@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<h4>User Management</h4>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Add User</a>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+
+@foreach (var u in Model)
+{
+    <tr>
+        <td>@u.FirstName @u.LastName</td>
+        <td>@u.Email</td>
+        <td>@u.Role.RoleName</td>
+        <td>
+            <span class="badge @(u.IsActive ? "bg-success" : "bg-danger")">
+                @(u.IsActive ? "Active" : "Inactive")
+            </span>
+        </td>
+        <td>
+            <a asp-action="Edit" asp-route-id="@u.UserId">Edit</a> |
+            <a asp-action="Delete" asp-route-id="@u.UserId"
+               onclick="return confirm('Delete user?')">Delete</a> |
+            <a asp-action="ToggleActive" asp-route-id="@u.UserId">
+                @(u.IsActive ? "Inactivate" : "Activate")
+            </a>
+        </td>
+    </tr>
+}
+</table>
+
