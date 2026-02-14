@@ -13,7 +13,7 @@
     @if (role == "SuperAdmin" || role == "Admin")
     {
         <li class="nav-item">
-            <a class="nav-link text-white @(currentController == "Users" ? "active fw-bold bg-dark" : "")"
+            <a class="nav-link text-white @(currentController == "User" ? "active fw-bold bg-dark" : "")"
                href="/User/Index">
                 Users
             </a>

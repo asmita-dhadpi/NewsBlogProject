@@ -41,6 +41,11 @@ namespace NewsBlogProject.Controllers
         // ================== CREATE ==================
         public IActionResult Create()
         {
+            GetRolelist();
+            return View();
+        }
+        private void GetRolelist()
+        {
             string role = HttpContext.Session.GetString("Role");
 
             var roles = _context.TblRoles
@@ -55,27 +60,54 @@ namespace NewsBlogProject.Controllers
                 roles = roles.Where(r => r.RoleName != "SuperAdmin");
             }
 
-                ViewBag.Roles = roles.ToList();
-            return View();
+            ViewBag.Roles = roles.ToList();
         }
-
         [HttpPost]
         public IActionResult Create(UserViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
+            {
+                var errors = ModelState
+                    .Where(x => x.Value.Errors.Count > 0)
+                    .Select(x => new
+                    {
+                        Field = x.Key,
+                        Errors = x.Value.Errors.Select(e => e.ErrorMessage)
+                    });
 
-            if (model.Password == null)
+                foreach (var error in errors)
+                {
+                    Console.WriteLine($"Field: {error.Field}");
+                    foreach (var msg in error.Errors)
+                    {
+                        Console.WriteLine($" - {msg}");
+                    }
+                }
+                GetRolelist();
                 return View(model);
+            }
 
+
+            // Password validation
+            if (string.IsNullOrWhiteSpace(model.Password))
+            {
+                ModelState.AddModelError("Password", "Password is required.");
+                GetRolelist();
+                return View(model);
+            }
+
+            // Email duplicate check
             bool emailExists = _context.TblUsers
-               .Any(u => u.Email == model.Email && u.IsDeleted == false);
+                .Any(u => u.Email == model.Email && u.IsDeleted == false);
 
             if (emailExists)
             {
-                ModelState.AddModelError("Email", "Email already registered");
+                ModelState.AddModelError("Email", "Email already registered.");
+                GetRolelist();
                 return View(model);
             }
+
+            int? currentUserId = HttpContext.Session.GetInt32("UserId");
 
             // Create hash & salt
             PasswordHelper.CreatePasswordHash(
@@ -96,7 +128,7 @@ namespace NewsBlogProject.Controllers
                 IsActive = true,
                 IsDeleted = false,
                 CreatedOn = DateTime.Now,
-                CreatedBy = HttpContext.Session.GetInt32("RoleId").Value,
+                CreatedBy = currentUserId,
             };
 
             _context.TblUsers.Add(user);
@@ -131,25 +163,35 @@ namespace NewsBlogProject.Controllers
                 RoleId=user.RoleId,
                 
             };
-            var roles = _context.TblRoles
-                .Where(r => r.IsActive);
-
-            if (role == "Admin")
-            {
-                roles = roles.Where(r => r.RoleName == "User");
-            }
-            else
-            {
-                roles = roles.Where(r => r.RoleName != "SuperAdmin");
-            }
-
-            ViewBag.Roles = roles.ToList();
+            GetRolelist();
             return View(model);
         }
 
         [HttpPost]
         public IActionResult Edit(UserViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value.Errors.Count > 0)
+                    .Select(x => new
+                    {
+                        Field = x.Key,
+                        Errors = x.Value.Errors.Select(e => e.ErrorMessage)
+                    });
+
+                foreach (var error in errors)
+                {
+                    Console.WriteLine($"Field: {error.Field}");
+                    foreach (var msg in error.Errors)
+                    {
+                        Console.WriteLine($" - {msg}");
+                    }
+                }
+                GetRolelist();
+                return View(model);
+            }
+
             var user = _context.TblUsers
                 .FirstOrDefault(u => u.UserId == model.UserId && u.IsDeleted == false);
 
@@ -162,9 +204,10 @@ namespace NewsBlogProject.Controllers
             if (emailExists)
             {
                 ModelState.AddModelError("Email", "Email already registered");
+                GetRolelist();
                 return View(model);
             }
-
+            int? currentUserId = HttpContext.Session.GetInt32("UserId");
             if (!string.IsNullOrWhiteSpace(model.Password))
             {
                 PasswordHelper.CreatePasswordHash(
@@ -183,7 +226,7 @@ namespace NewsBlogProject.Controllers
             user.Email = model.Email;
             user.PhoneNumber = model.PhoneNumber;
             user.ModifiedOn = DateTime.Now;
-            user.ModifiedBy = HttpContext.Session.GetInt32("RoleId").Value;
+            user.ModifiedBy = currentUserId;
 
             _context.SaveChanges();
             return RedirectToAction("Index");
