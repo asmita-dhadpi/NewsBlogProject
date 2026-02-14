@@ -1,0 +1,86 @@
+﻿@using NewsBlogProject.ViewModels
+@model BlogDetailsViewModel
+@{
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
+}
+<a asp-action="Index"
+   asp-controller="Home"
+   class="btn btn-secondary mb-3">
+    ← Back to Home
+</a>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h3>@Model.Blog.Title</h3>
+
+        <p class="text-muted">
+            Category: @Model.Blog.Category.CategoryName |
+            Posted on: @Model.Blog.CreatedOn.ToShortDateString() |
+            Posted by: @Model.Blog.CreatedByUser.FirstName
+        </p>
+
+        <hr />
+
+        <p>@Model.Blog.Content</p>
+    </div>
+</div>
+
+<!-- COMMENT SECTION -->
+<div class="card">
+    <div class="card-header fw-bold">
+        Comments (@Model.Comments.Count)
+    </div>
+
+    <div class="card-body">
+
+        @if (Model.Comments.Any())
+        {
+            @foreach (var comment in Model.Comments)
+            {
+                <div class="mb-3 border-bottom pb-2">
+                    <strong>@comment.User.FirstName</strong>
+                    <small class="text-muted">
+                        @comment.CreatedOn.ToString("dd MMM yyyy HH:mm")
+                    </small>
+                    <p>@comment.CommentText</p>
+                </div>
+            }
+
+        }
+        else
+        {
+            <p>No comments yet.</p>
+        }
+
+        <hr />
+        @if (Context.Session.GetInt32("UserId") != null)
+        {
+            <form asp-action="Add"
+                  asp-controller="Comments"
+                  asp-route-id="@Model.Blog.NewsBlogId"
+                  method="post">
+
+
+                <div class="mb-3">
+                    <textarea asp-for="CommentText"
+                              class="form-control"
+                              placeholder="Write a comment..."
+                              rows="3"></textarea>
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Post Comment
+                </button>
+            </form>
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                Please <a href="/Account/Login">login</a> to post a comment.
+            </div>
+        }
+
+
+    </div>
+</div>

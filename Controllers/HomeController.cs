@@ -76,11 +76,35 @@ namespace NewsBlogProject.Controllers
             return View(model);
         }
 
-
-        public IActionResult Privacy()
+        public IActionResult Details(int id)
         {
-            return View();
+            var blog = _context.TblNewsBlogs
+                .Include(b => b.Category)
+                .Include(b => b.CreatedByUser)
+                .FirstOrDefault(b => b.NewsBlogId == id &&
+                                     b.NewsBlogStatus.StatusName == "Approved" &&
+                                     b.IsDeleted == false);
+
+            if (blog == null)
+                return NotFound();
+
+            var comments = _context.TblComments
+                .Include(c => c.User)
+                .Where(c =>
+                    c.NewsBlogId == id &&
+                    c.IsActive == true)
+                .OrderByDescending(c => c.CreatedOn)
+                .ToList();
+
+            var model = new BlogDetailsViewModel
+            {
+                Blog = blog,
+                Comments = comments
+            };
+
+            return View(model);
         }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

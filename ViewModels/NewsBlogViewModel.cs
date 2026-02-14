@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NewsBlogProject.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace NewsBlogProject.ViewModels
 {
@@ -15,4 +16,13 @@ namespace NewsBlogProject.ViewModels
         [Required]
         public string Content { get; set; }
     }
+    public class BlogDetailsViewModel
+    {
+        public TblNewsBlog Blog { get; set; }
+
+        public List<TblComment> Comments { get; set; }
+
+        public string CommentText { get; set; }
+    }
+
 }
