@@ -133,11 +133,13 @@ namespace NewsBlogProject.Controllers
             if (role == "Admin" || role == "SuperAdmin")
             {
                 blog = _context.TblNewsBlogs
+                    .Include(u => u.NewsBlogStatus)
                     .FirstOrDefault(b => b.NewsBlogId == id && b.IsDeleted == false);
             }
             else
             {
                 blog = _context.TblNewsBlogs
+                    .Include(u => u.NewsBlogStatus)
                     .FirstOrDefault(b =>
                         b.NewsBlogId == id &&
                         b.CreatedByUserId == userId &&
@@ -181,11 +183,13 @@ namespace NewsBlogProject.Controllers
             if (role == "Admin" || role == "SuperAdmin")
             {
                 blog = _context.TblNewsBlogs
+                    .Include(u => u.NewsBlogStatus)
                     .FirstOrDefault(b => b.NewsBlogId == model.NewsBlogId && b.IsDeleted == false);
             }
             else
             {
                 blog = _context.TblNewsBlogs
+                    .Include(u => u.NewsBlogStatus)
                     .FirstOrDefault(b =>
                         b.NewsBlogId == model.NewsBlogId &&
                         b.CreatedByUserId == userId &&
