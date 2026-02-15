@@ -1,0 +1,27 @@
+﻿@model TblComment
+@{
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
+}
+
+<h4>Edit Comment</h4>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="CommentId" />
+
+    <div class="mb-3">
+        <textarea asp-for="CommentText"
+                  class="form-control"
+                  rows="4"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Update
+    </button>
+
+    <a asp-controller="Home"
+       asp-action="Details"
+       asp-route-id="@Model.NewsBlogId"
+       class="btn btn-secondary">
+        Cancel
+    </a>
+</form>

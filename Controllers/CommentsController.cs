@@ -50,6 +50,80 @@ namespace NewsBlogProject.Controllers
             _context.SaveChanges();
             return RedirectToAction("Details", "Home", new { id = id });
         }
+
+        public IActionResult Edit(int id)
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            string role = HttpContext.Session.GetString("Role");
+
+            var comment = _context.TblComments
+                .FirstOrDefault(c => c.CommentId == id);
+
+            if (comment == null)
+                return NotFound();
+
+            if (userId == null ||
+               (comment.UserId != userId &&
+                role != "Admin" &&
+                role != "SuperAdmin"))
+            {
+                return RedirectToAction("UnauthorizedAccess", "Account");
+            }
+
+            return View(comment);
+        }
+        [HttpPost]
+        public IActionResult Edit(TblComment model)
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            string role = HttpContext.Session.GetString("Role");
+
+            var comment = _context.TblComments
+                .FirstOrDefault(c => c.CommentId == model.CommentId);
+
+            if (comment == null)
+                return NotFound();
+
+            if (userId == null ||
+               (comment.UserId != userId &&
+                role != "Admin" &&
+                role != "SuperAdmin"))
+            {
+                return RedirectToAction("UnauthorizedAccess", "Account");
+            }
+
+            comment.CommentText = model.CommentText;
+            _context.SaveChanges();
+
+            return RedirectToAction("Details", "Home",
+                new { id = comment.NewsBlogId });
+        }
+        public IActionResult Delete(int id)
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            string role = HttpContext.Session.GetString("Role");
+
+            var comment = _context.TblComments
+                .FirstOrDefault(c => c.CommentId == id);
+
+            if (comment == null)
+                return NotFound();
+
+            if (userId == null ||
+               (comment.UserId != userId &&
+                role != "Admin" &&
+                role != "SuperAdmin"))
+            {
+                return RedirectToAction("UnauthorizedAccess", "Account");
+            }
+
+            //_context.TblComments.Remove(comment);
+            comment.IsActive= false;
+            _context.SaveChanges();
+
+            return RedirectToAction("Details", "Home",
+                new { id = comment.NewsBlogId });
+        }
         // Admin: Enable / Disable comment
         [AuthorizeRole("Admin", "SuperAdmin")]
         public IActionResult ToggleStatus(int id)

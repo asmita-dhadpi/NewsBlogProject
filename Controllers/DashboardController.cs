@@ -91,7 +91,7 @@ namespace NewsBlogProject.Controllers
             using SqlConnection con = new SqlConnection(_connectionString);
             SqlCommand cmd = new SqlCommand($@"
             SELECT
-              (SELECT COUNT(*) FROM tblUsers WHERE IsDeleted = 0),
+              (SELECT COUNT(*) FROM tblUsers WHERE IsDeleted = 0 AND RoleId=3),
               (SELECT COUNT(*) FROM tblNewsBlog b
                 JOIN tblNewsBlogStatus s ON b.NewsBlogStatusId = s.NewsBlogStatusId
                 WHERE s.StatusName = 'Approved' AND b.IsDeleted = 0  {dateCondition}),

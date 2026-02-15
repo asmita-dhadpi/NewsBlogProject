@@ -3,6 +3,10 @@
 @{
     Layout = "~/Views/Shared/_PublicLayout.cshtml";
 }
+@{
+    var currentUserId = Context.Session.GetInt32("UserId");
+    var role = Context.Session.GetString("Role");
+}
 <a asp-action="Index"
    asp-controller="Home"
    class="btn btn-secondary mb-3">
@@ -43,6 +47,26 @@
                         @comment.CreatedOn.ToString("dd MMM yyyy HH:mm")
                     </small>
                     <p>@comment.CommentText</p>
+                    @if (currentUserId != null &&
+                                (comment.UserId == currentUserId ||
+                                role == "Admin" ||
+                                role == "SuperAdmin"))
+                    {
+                        <a asp-controller="Comments"
+                           asp-action="Edit"
+                           asp-route-id="@comment.CommentId"
+                           class="btn btn-sm btn-warning">
+                            Edit
+                        </a>
+
+                        <a asp-controller="Comments"
+                           asp-action="Delete"
+                           asp-route-id="@comment.CommentId"
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('Delete this comment?')">
+                            Delete
+                        </a>
+                    }
                 </div>
             }
 
