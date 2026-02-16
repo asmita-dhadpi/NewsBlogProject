@@ -38,6 +38,12 @@ public partial class TblNewsBlog
 
     public bool IsDeleted { get; set; }
 
+    [StringLength(255)]
+    public string? ImagePath { get; set; }
+
+    [StringLength(255)]
+    public string? OriginalFileName { get; set; }
+
     [ForeignKey("ApprovedByUserId")]
     [InverseProperty("TblNewsBlogApprovedByUsers")]
     public virtual TblUser? ApprovedByUser { get; set; }

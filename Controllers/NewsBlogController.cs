@@ -13,10 +13,11 @@ namespace NewsBlogProject.Controllers
     public class NewsBlogController : Controller
     {
         private readonly NewsBlogDbContext _context;
-
-        public NewsBlogController(NewsBlogDbContext context)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public NewsBlogController(NewsBlogDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
         public IActionResult Index(string status)
         {
@@ -38,7 +39,7 @@ namespace NewsBlogProject.Controllers
 
             return View(news);
         }
-
+            
         [AuthorizeRole("User")]
         public IActionResult MyNews(string status)
         {
@@ -75,7 +76,8 @@ namespace NewsBlogProject.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Create(NewsBlogViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(NewsBlogViewModel model, IFormFile ImageFile)
         {
             if (!ModelState.IsValid)
             {
@@ -86,7 +88,22 @@ namespace NewsBlogProject.Controllers
                 );
                 return View(model);
             }
+            if (ImageFile != null)
+            {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+                var extension = Path.GetExtension(ImageFile.FileName).ToLower();
 
+                if (!allowedExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError("", "Only JPG and PNG allowed");
+                    ViewBag.Categories = new SelectList(
+                        _context.TblNewsCategories.Where(c => c.IsDeleted == false),
+                        "CategoryId",
+                        "CategoryName"
+                    );
+                    return View(model);
+                }
+            }
             int userId = HttpContext.Session.GetInt32("UserId").Value;
             string role = HttpContext.Session.GetString("Role");
 
@@ -114,7 +131,37 @@ namespace NewsBlogProject.Controllers
             };
 
             _context.TblNewsBlogs.Add(blog);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+
+            if (ImageFile != null)
+            {
+                var extension = Path.GetExtension(ImageFile.FileName).ToLower();
+
+                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+
+                // Generate filename using NewsBlogId
+                string newFileName = $"news_{blog.NewsBlogId}{extension}";
+
+                string filePath = Path.Combine(uploadsFolder, newFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await ImageFile.CopyToAsync(fileStream);
+                }
+
+                // Save image details in DB
+                //_context.Update(blog);
+                blog.ImagePath = "/uploads/" + newFileName;
+                blog.OriginalFileName = ImageFile.FileName;
+                await _context.SaveChangesAsync();
+
+            }
 
             if (role == "User")
                 return RedirectToAction("MyNews");
@@ -160,7 +207,9 @@ namespace NewsBlogProject.Controllers
                 NewsBlogId = blog.NewsBlogId,
                 CategoryId = blog.CategoryId,
                 Title = blog.Title,
-                Content = blog.Content
+                Content = blog.Content,
+                ImagePath=blog.ImagePath,
+                OriginalFileName=blog.OriginalFileName
             };
             ViewBag.Categories = new SelectList(
             _context.TblNewsCategories.Where(c => c.IsDeleted == false),
@@ -173,10 +222,28 @@ namespace NewsBlogProject.Controllers
         }
         // EDIT – POST
         [HttpPost]
-        public IActionResult Edit(NewsBlogViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(NewsBlogViewModel model,IFormFile ImageFile, bool RemoveImage)
         {
-            int userId = HttpContext.Session.GetInt32("UserId").Value;
-            string role = HttpContext.Session.GetString("Role");
+            if (ImageFile != null)
+            {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+                var extension = Path.GetExtension(ImageFile.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError("", "Only JPG and PNG allowed");
+                    ViewBag.Categories = new SelectList(
+                        _context.TblNewsCategories.Where(c => c.IsDeleted == false),
+                        "CategoryId",
+                        "CategoryName",
+                        model.CategoryId
+                    );
+                    return View(model);
+                }
+            }
+            var userId = HttpContext.Session.GetInt32("UserId");
+            string? role = HttpContext.Session.GetString("Role");
 
             TblNewsBlog? blog;
 
@@ -185,6 +252,7 @@ namespace NewsBlogProject.Controllers
                 blog = _context.TblNewsBlogs
                     .Include(u => u.NewsBlogStatus)
                     .FirstOrDefault(b => b.NewsBlogId == model.NewsBlogId && b.IsDeleted == false);
+
             }
             else
             {
@@ -207,17 +275,66 @@ namespace NewsBlogProject.Controllers
             blog.Content = model.Content;
             blog.CategoryId = model.CategoryId;
             blog.ModifiedOn = DateTime.Now;
+            if (RemoveImage && !string.IsNullOrEmpty(blog.ImagePath))
+            {
+                string oldPath = Path.Combine(
+                    _webHostEnvironment.WebRootPath,
+                    blog.ImagePath.TrimStart('/')
+                );
 
-            _context.SaveChanges();
+                if (System.IO.File.Exists(oldPath))
+                    System.IO.File.Delete(oldPath);
+
+                blog.ImagePath = null;
+                blog.OriginalFileName = null;
+            }
+
+            if (ImageFile != null)
+            {
+                var extension = Path.GetExtension(ImageFile.FileName).ToLower();
+
+                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                // DELETE OLD IMAGE
+                if (!string.IsNullOrEmpty(blog.ImagePath))
+                {
+                    string oldFilePath = Path.Combine(
+                        _webHostEnvironment.WebRootPath,
+                        blog.ImagePath.TrimStart('/')
+                         );
+
+                    if (System.IO.File.Exists(oldFilePath))
+                        System.IO.File.Delete(oldFilePath);
+                }
+                string newFileName = $"news_{blog.NewsBlogId}{extension}";
+                //string newFileName = $"news_{blog.NewsBlogId}_{DateTime.Now.Ticks}{extension}";
+                string filePath = Path.Combine(uploadsFolder, newFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await ImageFile.CopyToAsync(stream);
+                }
+
+                blog.ImagePath = "/uploads/" + newFileName;
+                blog.OriginalFileName = ImageFile.FileName;
+            }
+
+            await _context.SaveChangesAsync();
+
+           // _context.SaveChanges();
             if (role=="User")
                 return RedirectToAction("MyNews");
             else
                 return RedirectToAction("Index");
         }
         // DELETE (Soft Delete)
-        public IActionResult Delete(int id)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
         {
-            int userId = HttpContext.Session.GetInt32("UserId").Value;
+            var userId = HttpContext.Session.GetInt32("UserId");
             string role = HttpContext.Session.GetString("Role");
 
             TblNewsBlog? blog;
@@ -243,9 +360,20 @@ namespace NewsBlogProject.Controllers
             {
                 return RedirectToAction("UnauthorizedAccess", "Account");
             }
+            if (!string.IsNullOrEmpty(blog.ImagePath))
+            {
+                string filePath = Path.Combine(
+                    _webHostEnvironment.WebRootPath,
+                    blog.ImagePath.TrimStart('/')
+                );
+
+                if (System.IO.File.Exists(filePath))
+                    System.IO.File.Delete(filePath);
+            }
+
 
             blog.IsDeleted = true;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             if (role == "User")
                 return RedirectToAction("MyNews");

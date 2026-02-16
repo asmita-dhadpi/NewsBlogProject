@@ -22,7 +22,10 @@
             Posted on: @Model.Blog.CreatedOn.ToShortDateString() |
             Posted by: @Model.Blog.CreatedByUser.FirstName
         </p>
-
+        @if (!string.IsNullOrEmpty(@Model.Blog.ImagePath))
+        {
+            <img src="@Model.Blog.ImagePath" width="500" />
+        }
         <hr />
 
         <p>@Model.Blog.Content</p>

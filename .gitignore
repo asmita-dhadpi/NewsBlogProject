@@ -4,3 +4,4 @@ obj/
 appsettings.json
 *.csproj.user
 appsettings.Development.json
+wwwroot/uploads/

@@ -15,6 +15,10 @@ namespace NewsBlogProject.ViewModels
 
         [Required]
         public string Content { get; set; }
+
+        public string? ImagePath { get; set; }
+
+        public string? OriginalFileName { get; set; }
     }
     public class BlogDetailsViewModel
     {
@@ -23,6 +27,10 @@ namespace NewsBlogProject.ViewModels
         public List<TblComment> Comments { get; set; }
 
         public string CommentText { get; set; }
+
+        public string? ImagePath { get; set; }
+
+        public string? OriginalFileName { get; set; }
     }
 
 }

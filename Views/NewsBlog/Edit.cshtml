@@ -7,7 +7,7 @@
 
 <h4>Edit News</h4>
 
-<form asp-action="Edit" method="post">
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="NewsBlogId" />
 
     <div class="mb-3">
@@ -25,13 +25,56 @@
         <input asp-for="Title" class="form-control" />
         <span asp-validation-for="Title" class="text-danger"></span>
     </div>
+    @if (!string.IsNullOrEmpty(Model.ImagePath))
+    {
+        <div class="mb-3">
+            <label>Current Image:</label><br />
+            <img id="imagePreview"
+                 src="@Model.ImagePath"
+                 class="img-thumbnail"
+                 style="max-width:300px;" />
 
+            <p class="text-muted" id="OriginalFileName">Original File: @Model.OriginalFileName</p>
+            <input type="hidden" name="RemoveImage" id="RemoveImage" value="false" />
+
+            <button type="button"
+                    class="btn btn-danger btn-sm"
+                    onclick="removeImage()">
+                Remove Image
+            </button>
+        </div>
+        <div class="form-group">
+            <label>Replace Image</label>
+            <input type="file"
+                   name="ImageFile"
+                   class="form-control"
+                   accept=".jpg,.jpeg,.png"
+                   onchange="previewImage(event)" />
+        </div>
+    }
+    else
+    {
+        <div class="form-group">
+            <label>Upload Image</label>
+            <input type="file"
+                   name="ImageFile"
+                   class="form-control"
+                   accept=".jpg,.jpeg,.png"
+                   onchange="previewImage(event)" />
+        </div>
+
+    }
+    <div class="mb-3">
+        <img id="imagePreviewNew"
+             src=""
+             class="img-thumbnail"
+             style="max-width:300px; display:none;" />
+    </div>
     <div class="mb-3">
         <label class="form-label">Content</label>
         <textarea asp-for="Content" rows="5" class="form-control"></textarea>
         <span asp-validation-for="Content" class="text-danger"></span>
     </div>
-
     <button type="submit" class="btn btn-primary">Update</button>
     @if (role == "Admin" || role == "SuperAdmin")
     {
@@ -43,3 +86,30 @@
     }
 </form>
 
+@section Scripts {
+    <script>
+        function previewImage(event) {
+            const reader = new FileReader();
+            const image = document.getElementById("imagePreviewNew");
+
+            reader.onload = function () {
+                image.src = reader.result;
+                image.style.display = "block";
+            }
+
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        function removeImage() {
+            const image = document.getElementById("imagePreview");
+            const removeField = document.getElementById("RemoveImage");
+            const OriginalFileName = document.getElementById("OriginalFileName");
+
+            image.src = "";
+            image.style.display = "none";
+
+            removeField.value = "true";
+            OriginalFileName.style.display = "none";
+        }
+    </script>
+}
